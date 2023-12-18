@@ -1,6 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
+import * as Yup from 'yup'
+import { Formik } from 'formik'
+import BouncyCheckbox from 'react-native-bouncy-checkbox'
 
+const PasswordSchema = Yup.object().shape({
+  passwordLength: Yup.number()
+  .min(4, 'Minimum 4 characters required')
+  .max(16, 'Maximum characters can be 16')
+  .required('Minimum 4 characters required')
+})
 export default function App() {
   const [password, setPassword] = useState('')
   const [isPasswordGenerated, setIsPasswordGenerated] = useState(false)
@@ -35,7 +44,8 @@ export default function App() {
       result += characters.charAt(characterIndex)
     }
 
-    return result;
+    setPassword(result)
+    setIsPasswordGenerated(true)
   }
 
   const resetStates = () =>{
@@ -48,10 +58,117 @@ export default function App() {
   }
   
   return (
-    <View>
-      <Text>App</Text>
-    </View>
+    <ScrollView keyboardShouldPersistTaps="handled">
+      <SafeAreaView>
+        <View>
+          <Text>Password Generation</Text>
+          <Formik
+            initialValues={{ passwordLength: '' }}
+            validationSchema={ PasswordSchema }
+            onSubmit={ values => { 
+              console.log(values)
+              generatePassword(+values.passwordLength) 
+            }}//+ convert string "number" into actual number
+          >
+            {({
+              values,
+              errors,
+              touched,
+              isValid,
+              handleChange,
+              handleSubmit,
+              handleReset,
+            }) => (
+              <>
+                <View>
+                  <View>
+                    <Text>Password Length</Text>
+                    {touched.passwordLength && errors.passwordLength && (
+                      <Text>
+                        {errors.passwordLength}
+                      </Text>
+                    )}
+                  </View>
+                   <TextInput 
+                    value={values.passwordLength} 
+                    onChangeText={handleChange('passwordLength')}
+                    placeholder='Ex. 8'
+                    keyboardType='numeric'
+                    />
+                </View>
+                <View>
+                  <Text>Include Lowercase</Text>
+                  <BouncyCheckbox
+                    disableBuiltInState
+                    isChecked={lowerCase}
+                    onPress={()=> setLowerCase(!lowerCase)}
+                    fillColor='green'
+                  />
+                </View>
+                <View>
+                  <Text>Include Uppercase Letters</Text>
+                  <BouncyCheckbox
+                    disableBuiltInState
+                    isChecked={upperCase}
+                    onPress={()=> setUpperCase(!upperCase)}
+                    fillColor='yellow'
+                  />
+                </View>
+                <View>
+                  <Text>Include Numbers</Text>
+                  <BouncyCheckbox
+                    disableBuiltInState
+                    isChecked={numbers}
+                    onPress={()=> setNumbers(!numbers)}
+                    fillColor='blue'
+                  />
+                </View>
+                <View>
+                  <Text>Include Symbols</Text>
+                  <BouncyCheckbox
+                    disableBuiltInState
+                    isChecked={symbols}
+                    onPress={()=> setSymbols(!symbols)}
+                    fillColor='purple'
+                  />
+                </View>
+                <View>
+                  <TouchableOpacity 
+                    style={styles.width}
+                    disabled={!isValid}
+                    onPress={()=>{handleSubmit()}}
+                  >
+                    <Text>Generate Password</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                  style={styles.width}
+                    onPress={() => {
+                      handleReset();
+                      resetStates();
+                    }}
+                  >
+                    <Text>Reset</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </Formik>
+        </View>
+        {isPasswordGenerated ? (
+          <View>
+            <Text>Result:</Text>
+            <Text>Long Press to Copy</Text>
+            <Text selectable={true}>{password}</Text>
+          </View>
+        ) : null}
+      </SafeAreaView>
+    </ScrollView>
   )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  width:{
+    fontSize: 40,
+    margin: 10
+  }
+})
