@@ -1,4 +1,4 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
@@ -63,9 +63,9 @@ export default function App() {
   
   return (
     <ScrollView keyboardShouldPersistTaps="handled">
-      <SafeAreaView>
+      <SafeAreaView style={styles.container}>
         <View>
-          <Text>Password Generation</Text>
+          <Text style={styles.mainHeading}>Password Generator</Text>
           <Formik
             initialValues={{ 
               passwordLength: '', 
@@ -90,24 +90,25 @@ export default function App() {
               handleReset,
             }) => (
               <>
-                <View>
+                <View style={styles.viewContainer}>
                   <View>
-                    <Text>Password Length</Text>
-                    {touched.passwordLength && errors.passwordLength && (
-                      <Text>
-                        {errors.passwordLength}
-                      </Text>
-                    )}
+                    <Text style={styles.label}>Password Length:</Text>
                   </View>
                    <TextInput 
+                    style={styles.input}
                     value={values.passwordLength} 
                     onChangeText={handleChange('passwordLength')}
                     placeholder='Ex. 8'
                     keyboardType='numeric'
                     />
                 </View>
-                <View>
-                  <Text>Include Lowercase</Text>
+                {touched.passwordLength && errors.passwordLength && (
+                      <Text style={styles.error}>
+                        {errors.passwordLength}
+                      </Text>
+                )}
+                <View style={styles.border}></View>
+                <View style={styles.viewContainer}>
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={lowerCase}
@@ -117,9 +118,9 @@ export default function App() {
                     }}
                     fillColor='green'
                   />
+                    <Text style={styles.label}>Include Lowercase Letters</Text>
                 </View>
-                <View>
-                  <Text>Include Uppercase Letters</Text>
+                <View style={styles.viewContainer}>
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={upperCase}
@@ -127,11 +128,11 @@ export default function App() {
                       values.midSeverity = !upperCase;
                       setUpperCase(!upperCase);
                     }}
-                    fillColor='yellow'
-                  />
+                    fillColor='#fccb06'
+                    />
+                    <Text style={styles.label}>Include Uppercase Letters</Text>
                 </View>
-                <View>
-                  <Text>Include Numbers</Text>
+                <View style={styles.viewContainer}>
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={numbers}
@@ -139,11 +140,11 @@ export default function App() {
                       values.highSeverity = !numbers;
                       setNumbers(!numbers);
                     }}
-                    fillColor='blue'
-                  />
+                    fillColor='#ff7f11'
+                    />
+                    <Text style={styles.label}>Include Numbers</Text>
                 </View>
-                <View>
-                  <Text>Include Symbols</Text>
+                <View style={styles.viewContainer}>
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={symbols}
@@ -151,53 +152,109 @@ export default function App() {
                       values.advSeverity = !symbols;
                       setSymbols(!symbols);
                     }}
-                    fillColor='purple'
-                  />
+                    fillColor='#9395d3'
+                    />
+                    <Text style={styles.label}>Include Symbols</Text>
                 </View>
-                <View style={styles.width}>
+                <View >
                   {!values.lowSeverity && !values.midSeverity && !values.highSeverity && !values.advSeverity && (
-                  <Text>
+                  <Text style={styles.error}>
                     At least select one severity level.
                   </Text>
                 )}
                 </View>
-                <View>
-                  <TouchableOpacity 
-                    style={styles.width}
+                {isPasswordGenerated ? (
+                    <View style={styles.pwdContainer}>
+                      <Text style={styles.label}>Password:</Text>
+                      <Text style={styles.label} selectable={true}>{password}</Text>
+                    </View>
+                  ) : null}
+                <View style={styles.buttonContainer}>
+                  <Button 
+                    color={'green'}
+                    title="Generate Password"
                     disabled={(!values.lowSeverity && !values.midSeverity && !values.highSeverity && !values.advSeverity) || !isValid}
                     onPress={()=>{handleSubmit()}}
-                  >
-                    <Text>Generate Password</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                  style={styles.width}
+                  />
+                  <Button
+                    color={'#800020'}
+                    title="Reset"
                     onPress={() => {
                       handleReset();
                       resetStates();
                     }}
-                  >
-                    <Text>Reset</Text>
-                  </TouchableOpacity>
+                  />
                 </View>
               </>
             )}
           </Formik>
         </View>
-        {isPasswordGenerated ? (
-          <View>
-            <Text>Result:</Text>
-            <Text>Long Press to Copy</Text>
-            <Text selectable={true}>{password}</Text>
-          </View>
-        ) : null}
       </SafeAreaView>
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  width:{
-    fontSize: 40,
-    margin: 10
+  container: {
+    padding: 15,
+    flex: 1,
+    backgroundColor: 'black',
+    fontSize: 16,
+  },
+  mainHeading: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    letterSpacing: 0.8,
+    paddingBottom: 10,
+    marginBottom: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray'
+  },
+  viewContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    gap: 8
+  },
+  label: {
+    color: 'white',
+    fontSize: 16,
+    letterSpacing: 0.8
+  },
+  input: {
+    color: 'white',
+    padding: 0,
+    fontSize: 16,
+    width: 60,
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray'
+  },
+  error:{
+    color: 'red',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 5
+  },
+  border:{
+    width: 150,
+    backgroundColor: 'gray',
+    height: 3,
+    marginLeft: '28%',
+    marginTop: 20,
+    marginBottom: 20
+  },
+  buttonContainer:{
+    flexDirection: 'row',
+    justifyContent:'flex-end',
+    marginTop: 50,
+    gap: 8
+  },
+  pwdContainer:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 30,
+    gap: 8
   }
 })
