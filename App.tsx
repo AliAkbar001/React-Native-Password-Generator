@@ -1,29 +1,33 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import * as Yup from 'yup'
-import { Formik } from 'formik'
-import BouncyCheckbox from 'react-native-bouncy-checkbox'
+import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 const PasswordSchema = Yup.object().shape({
   passwordLength: Yup.number()
   .min(4, 'Minimum 4 characters required')
   .max(16, 'Maximum characters can be 16')
-  .required('Minimum 4 characters required')
+  .required('Minimum 4 characters required'),
+  lowSeverity: Yup.boolean().required(),
+  midSeverity: Yup.boolean().required(),
+  highSeverity: Yup.boolean().required(),
+  advSeverity: Yup.boolean().required(),
 })
 export default function App() {
-  const [password, setPassword] = useState('')
-  const [isPasswordGenerated, setIsPasswordGenerated] = useState(false)
-  const [lowerCase, setLowerCase] = useState(false)
-  const [upperCase, setUpperCase] = useState(false)
-  const [numbers, setNumbers] = useState(false)
-  const [symbols, setSymbols] = useState(false)
+  const [password, setPassword] = useState('');
+  const [isPasswordGenerated, setIsPasswordGenerated] = useState(false);
+  const [lowerCase, setLowerCase] = useState(true);
+  const [upperCase, setUpperCase] = useState(false);
+  const [numbers, setNumbers] = useState(false);
+  const [symbols, setSymbols] = useState(false);
 
   const generatePassword = (passwordLength:number) => {
     let characters = ''
-    const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz"
-    const numbersChars = "0123456789"
-    const specialChars = "!@#$%^&*()_+[]\';/.,{}|:?> <`~"
+    const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
+    const numbersChars = "0123456789";
+    const specialChars = "!@#$%^&*()_+[]\';/.,{}|:?> <`~";
 
     if(upperCase){
       characters += upperCaseChars
@@ -51,7 +55,7 @@ export default function App() {
   const resetStates = () =>{
     setPassword('')
     setIsPasswordGenerated(false)
-    setLowerCase(false)
+    setLowerCase(true)
     setNumbers(false)
     setUpperCase(false)
     setSymbols(false)
@@ -63,7 +67,13 @@ export default function App() {
         <View>
           <Text>Password Generation</Text>
           <Formik
-            initialValues={{ passwordLength: '' }}
+            initialValues={{ 
+              passwordLength: '', 
+              lowSeverity: true, 
+              midSeverity: false, 
+              highSeverity: false, 
+              advSeverity: false 
+            }}
             validationSchema={ PasswordSchema }
             onSubmit={ values => { 
               console.log(values)
@@ -101,7 +111,10 @@ export default function App() {
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={lowerCase}
-                    onPress={()=> setLowerCase(!lowerCase)}
+                    onPress={()=> {
+                      values.lowSeverity = !lowerCase;
+                      setLowerCase(!lowerCase);
+                    }}
                     fillColor='green'
                   />
                 </View>
@@ -110,7 +123,10 @@ export default function App() {
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={upperCase}
-                    onPress={()=> setUpperCase(!upperCase)}
+                    onPress={()=> {
+                      values.midSeverity = !upperCase;
+                      setUpperCase(!upperCase);
+                    }}
                     fillColor='yellow'
                   />
                 </View>
@@ -119,7 +135,10 @@ export default function App() {
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={numbers}
-                    onPress={()=> setNumbers(!numbers)}
+                    onPress={()=> {
+                      values.highSeverity = !numbers;
+                      setNumbers(!numbers);
+                    }}
                     fillColor='blue'
                   />
                 </View>
@@ -128,14 +147,24 @@ export default function App() {
                   <BouncyCheckbox
                     disableBuiltInState
                     isChecked={symbols}
-                    onPress={()=> setSymbols(!symbols)}
+                    onPress={()=> {
+                      values.advSeverity = !symbols;
+                      setSymbols(!symbols);
+                    }}
                     fillColor='purple'
                   />
+                </View>
+                <View style={styles.width}>
+                  {!values.lowSeverity && !values.midSeverity && !values.highSeverity && !values.advSeverity && (
+                  <Text>
+                    At least select one severity level.
+                  </Text>
+                )}
                 </View>
                 <View>
                   <TouchableOpacity 
                     style={styles.width}
-                    disabled={!isValid}
+                    disabled={(!values.lowSeverity && !values.midSeverity && !values.highSeverity && !values.advSeverity) || !isValid}
                     onPress={()=>{handleSubmit()}}
                   >
                     <Text>Generate Password</Text>
